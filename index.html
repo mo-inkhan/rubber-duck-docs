@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Moin Khan
+  MIT License
+
+  https://github.com/mo-inkhan/rubber-duck
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rubber-duck — Claude Code Plugin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --duck: #F5A623;
+    --duck-light: #FFF8ED;
+    --duck-dark: #C17D10;
+    --bg: #0D0D0D;
+    --surface: #141414;
+    --surface2: #1C1C1C;
+    --border: rgba(255,255,255,0.08);
+    --text: #F0EDE8;
+    --muted: rgba(240,237,232,0.45);
+    --green: #3DD68C;
+    --red: #FF6B6B;
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Inter', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+    background: rgba(13,13,13,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 15px; }
+  .nav-duck { font-size: 22px; }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--duck); color: #000; border: none;
+    padding: 6px 16px; border-radius: 6px; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: var(--mono);
+    letter-spacing: -0.02em; transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(245,166,35,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
+    color: var(--duck); border: 1px solid rgba(245,166,35,0.3);
+    padding: 4px 12px; border-radius: 100px;
+    margin-bottom: 2rem; text-transform: uppercase;
+  }
+  .hero-badge::before { content: '●'; font-size: 7px; }
+  h1 {
+    font-family: var(--serif); font-size: clamp(3.5rem, 9vw, 7rem);
+    font-weight: 400; line-height: 1.05; letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+  h1 em { font-style: italic; color: var(--duck); }
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem); color: var(--muted);
+    max-width: 520px; margin: 0 auto 3rem;
+    font-style: italic; font-family: var(--serif);
+  }
+  .install-block {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 20px;
+    font-family: var(--mono); font-size: 14px;
+    margin-bottom: 1rem;
+  }
+  .install-label { color: var(--muted); font-size: 11px; margin-right: 4px; }
+  .install-cmd { color: var(--duck); }
+  .copy-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 4px 10px; border-radius: 4px;
+    font-size: 11px; cursor: pointer; font-family: var(--mono);
+    transition: all 0.2s; margin-left: auto;
+  }
+  .copy-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+  .hero-hint { font-size: 12px; color: var(--muted); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex; justify-content: center; gap: 4rem;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--serif); font-size: 2.5rem;
+    font-weight: 400; color: var(--duck); display: block;
+  }
+  .stat-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* SECTIONS */
+  section { padding: 6rem 2rem; max-width: 900px; margin: 0 auto; }
+
+  .section-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    color: var(--duck); text-transform: uppercase; margin-bottom: 1rem;
+  }
+  h2 {
+    font-family: var(--serif); font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 400; line-height: 1.1; margin-bottom: 1.5rem;
+  }
+  h2 em { font-style: italic; color: var(--duck); }
+  .section-lead { font-size: 1.05rem; color: var(--muted); max-width: 560px; line-height: 1.8; }
+
+  /* TERMINAL DEMO */
+  .terminal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin: 3rem 0;
+    font-family: var(--mono); font-size: 13.5px;
+  }
+  .terminal-bar {
+    background: var(--surface2); padding: 10px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-r { background: #FF5F56; }
+  .dot-y { background: #FFBD2E; }
+  .dot-g { background: #27C93F; }
+  .terminal-title { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .terminal-body { padding: 1.5rem; line-height: 1.9; }
+  .t-prompt { color: var(--muted); }
+  .t-cmd { color: var(--text); }
+  .t-duck { color: var(--duck); font-weight: 500; }
+  .t-response { color: rgba(240,237,232,0.7); padding-left: 1.5rem; border-left: 2px solid rgba(245,166,35,0.3); margin: 0.5rem 0; }
+  .t-user { color: var(--text); }
+  .t-dim { color: var(--muted); font-size: 12px; }
+  .t-green { color: var(--green); }
+  .t-separator { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+
+  /* COMMANDS GRID */
+  .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+  .cmd-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.25rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cmd-card:hover { border-color: rgba(245,166,35,0.3); background: var(--surface2); }
+  .cmd-name { font-family: var(--mono); font-size: 13px; color: var(--duck); margin-bottom: 0.5rem; }
+  .cmd-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* PHILOSOPHY */
+  .pull-quote {
+    border-left: 3px solid var(--duck);
+    padding: 1rem 1.5rem;
+    margin: 2.5rem 0;
+    font-family: var(--serif); font-size: 1.35rem;
+    font-style: italic; color: rgba(240,237,232,0.8);
+    line-height: 1.5;
+  }
+
+  /* STREAK */
+  .streak-demo {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 2rem; margin-top: 2rem;
+    display: flex; align-items: center; gap: 2rem;
+  }
+  .streak-duck { font-size: 4rem; line-height: 1; }
+  .streak-num { font-family: var(--serif); font-size: 3rem; color: var(--duck); line-height: 1; }
+  .streak-lbl { font-size: 12px; color: var(--muted); margin-top: 4px; font-family: var(--mono); }
+  .streak-bar { display: flex; gap: 4px; margin-top: 1rem; flex-wrap: wrap; }
+  .streak-dot {
+    width: 14px; height: 14px; border-radius: 3px;
+  }
+  .streak-dot.solved { background: var(--duck); }
+  .streak-dot.peeked { background: var(--surface2); border: 1px solid var(--border); }
+
+  /* FILE TREE */
+  .file-tree {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem;
+    font-family: var(--mono); font-size: 13px;
+    line-height: 2;
+  }
+  .ft-dir { color: var(--duck); }
+  .ft-file { color: var(--muted); }
+  .ft-desc { color: rgba(240,237,232,0.35); margin-left: 1rem; }
+  .ft-important { color: var(--text); }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 3rem 2rem 4rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 13px;
+  }
+  footer a { color: var(--duck); text-decoration: none; }
+  .footer-duck { font-size: 2rem; display: block; margin-bottom: 1rem; }
+
+  /* LIVE DEMO */
+  .demo-container {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin: 2rem 0;
+  }
+  .demo-header {
+    background: var(--surface2); padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .demo-title { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .mode-badge {
+    background: rgba(245,166,35,0.15); color: var(--duck);
+    border: 1px solid rgba(245,166,35,0.3);
+    padding: 3px 10px; border-radius: 100px;
+    font-family: var(--mono); font-size: 11px;
+  }
+  .demo-messages { padding: 1.5rem; min-height: 280px; max-height: 380px; overflow-y: auto; }
+  .msg { margin-bottom: 1.25rem; }
+  .msg-role { font-family: var(--mono); font-size: 11px; margin-bottom: 4px; }
+  .msg-role.user { color: var(--muted); }
+  .msg-role.duck { color: var(--duck); }
+  .msg-body { font-size: 14px; line-height: 1.7; padding: 10px 14px; border-radius: 8px; }
+  .msg-body.user { background: var(--surface2); color: var(--text); }
+  .msg-body.duck { background: rgba(245,166,35,0.07); color: rgba(240,237,232,0.85); border: 1px solid rgba(245,166,35,0.15); }
+  .demo-input-row {
+    padding: 12px 16px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .demo-input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 12px;
+    color: var(--text); font-size: 14px; font-family: var(--sans);
+    outline: none;
+  }
+  .demo-input:focus { border-color: rgba(245,166,35,0.4); }
+  .demo-send {
+    background: var(--duck); color: #000; border: none;
+    padding: 8px 16px; border-radius: 6px; font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: var(--mono);
+    transition: opacity 0.2s;
+  }
+  .demo-send:hover { opacity: 0.85; }
+  .demo-reveal {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted); padding: 8px 12px; border-radius: 6px;
+    font-size: 12px; font-family: var(--mono); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .demo-reveal:hover { color: var(--red); border-color: rgba(255,107,107,0.3); }
+  .typing { display: inline-flex; gap: 3px; align-items: center; padding: 4px 0; }
+  .typing span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--duck); opacity: 0.5;
+    animation: blink 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+  @media (max-width: 640px) {
+    .cmd-grid { grid-template-columns: 1fr; }
+    .stats-bar { gap: 2rem; flex-wrap: wrap; }
+    .streak-demo { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span class="nav-duck">🦆</span>
+    <span>rubber-duck</span>
+  </div>
+  <div class="nav-links">
+    <a href="#demo">Demo</a>
+    <a href="#commands">Commands</a>
+  </div>
+  <button class="nav-cta" onclick="copyInstall()">/plugin install</button>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">Claude Code Plugin</div>
+  <h1>Think it<br>through<br><em>yourself.</em></h1>
+  <p class="hero-sub">Most AI tools race to give you the answer. rubber-duck asks the right question instead.</p>
+
+  <div class="install-block">
+    <span class="install-label">></span>
+    <span class="install-cmd" id="install-text">/plugin marketplace add https://github.com/mo-inkhan/rubber-duck</span>
+    <button class="copy-btn" onclick="copyInstall()" id="copy-btn">copy</button>
+  </div>
+  <p class="hero-hint">Paste in Claude Code · MIT license · Zero config</p>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-num">4</span>
+    <span class="stat-lbl">slash commands</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">1</span>
+    <span class="stat-lbl">Socratic agent</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">∞</span>
+    <span class="stat-lbl">aha moments</span>
+  </div>
+</div>
+
+<!-- WHY -->
+<section>
+  <div class="section-label">The problem</div>
+  <h2>AI that solves<br>everything teaches <em>nothing.</em></h2>
+  <p class="section-lead">When you paste a bug into Claude and it writes the fix, you ship faster today. But you've learned nothing, and the same bug will be back next week wearing a different hat.</p>
+
+  <div class="pull-quote">
+    "The rubber duck technique works because articulation forces clarity. When you have to explain something to someone — even a silent duck — you expose your own assumptions."
+  </div>
+
+  <p class="section-lead">rubber-duck gives the duck a voice. It never tells you the answer. It asks the question that makes <em>you</em> find it.</p>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="section-label">Live demo</div>
+  <h2>See it <em>in action.</em></h2>
+  <p class="section-lead">Type a problem below. Watch how it thinks with you, not for you. Hit "reveal" when you've had enough.</p>
+
+  <div class="demo-container">
+    <div class="demo-header">
+      <span class="demo-title">rubber-duck session</span>
+      <span class="mode-badge">🦆 Socratic mode</span>
+    </div>
+    <div class="demo-messages" id="demo-messages">
+      <div class="msg">
+        <div class="msg-role duck">🦆 rubber-duck</div>
+        <div class="msg-body duck">I'm in Rubber Duck mode — I'll ask questions instead of writing code for you. Use the "reveal" button whenever you want me to step out of this.<br><br>What are you working through today?</div>
+      </div>
+    </div>
+    <div class="demo-input-row">
+      <input type="text" class="demo-input" id="demo-input" placeholder="Describe your bug or problem..." />
+      <button class="demo-reveal" onclick="triggerReveal()">🔓 reveal</button>
+      <button class="demo-send" onclick="sendDemoMessage()">Ask →</button>
+    </div>
+  </div>
+</section>
+
+<!-- COMMANDS -->
+<section id="commands">
+  <div class="section-label">Commands</div>
+  <h2>Four tools,<br>one <em>philosophy.</em></h2>
+  <p class="section-lead">Every command keeps you in the driver's seat. Claude is the navigator, not the driver.</p>
+
+  <div class="cmd-grid">
+    <div class="cmd-card">
+      <div class="cmd-name">/duck [problem]</div>
+      <div class="cmd-desc">Enter Socratic mode. Describe your problem or just start talking. Claude will ask one question at a time.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">/duck:design [topic]</div>
+      <div class="cmd-desc">Architecture thinking mode. Surfaces constraints, tradeoffs, and failure modes through questions — never prescribes a solution.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">/duck:status</div>
+      <div class="cmd-desc">See a structured mirror of your session — what you've figured out, what's still open, and the most productive next question.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">/duck:reveal</div>
+      <div class="cmd-desc">Break glass. Get the full answer. Claude first acknowledges what you figured out yourself, then fills in the rest.</div>
+    </div>
+  </div>
+</section>
+
+<!-- STREAK -->
+<section>
+  <div class="section-label">Streak tracking</div>
+  <h2>Build the habit of <em>thinking.</em></h2>
+  <p class="section-lead">After every session, rubber-duck logs whether you used <code style="font-family: var(--mono); font-size: 13px; color: var(--duck);">/duck:reveal</code> and maintains a streak of sessions where you solved it without peeking.</p>
+
+  <div class="terminal" style="margin: 2rem 0;">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+      <span class="terminal-title">session end</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-green">🦆✅  Rubber Duck session complete.</div>
+      <div style="color: var(--muted); padding-left: 1.5rem;">You solved it without peeking!</div>
+      <div style="color: var(--muted); padding-left: 1.5rem;">No-peek streak: <span style="color: var(--duck);">7 sessions</span> 🔥</div>
+      <div style="color: var(--muted); padding-left: 1.5rem;">All-time: <span style="color: var(--text);">14/17</span> solved without peeking</div>
+    </div>
+  </div>
+
+  <div class="streak-demo">
+    <div>
+      <div class="streak-duck">🦆</div>
+    </div>
+    <div>
+      <div class="streak-num">7</div>
+      <div class="streak-lbl">session streak · no peeking</div>
+      <div class="streak-bar" id="streak-viz"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- CONTRIBUTE -->
+<section>
+  <div class="section-label">Contribute</div>
+  <h2>Make it <em>better.</em></h2>
+  <p class="section-lead">Especially looking for:</p>
+  <br>
+  <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+    <div style="display: flex; gap: 12px; align-items: flex-start;">
+      <span style="color: var(--duck); font-family: var(--mono); font-size: 12px; padding-top: 2px;">→</span>
+      <span style="color: var(--muted); font-size: 14px;">New question toolkits for specific domains (SQL debugging, regex, async/await confusion, CSS layout)</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: flex-start;">
+      <span style="color: var(--duck); font-family: var(--mono); font-size: 12px; padding-top: 2px;">→</span>
+      <span style="color: var(--muted); font-size: 14px;">A <code style="font-family: var(--mono); color: var(--duck); font-size: 12px;">/duck:learn</code> mode that teaches the concept <em>after</em> you've reasoned to the answer</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: flex-start;">
+      <span style="color: var(--duck); font-family: var(--mono); font-size: 12px; padding-top: 2px;">→</span>
+      <span style="color: var(--muted); font-size: 14px;">Export session logs to markdown for personal knowledge bases</span>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: flex-start;">
+      <span style="color: var(--duck); font-family: var(--mono); font-size: 12px; padding-top: 2px;">→</span>
+      <span style="color: var(--muted); font-size: 14px;">Team mode — shared streak boards for dev teams</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="footer-duck">🦆</span>
+  <p>MIT license · Built for <a href="#">Claude Code</a></p>
+  <p style="margin-top: 0.5rem;">The duck never judges. It only asks.</p>
+</footer>
+
+<!-- DEMO LOGIC -->
+<script>
+const DUCK_RESPONSES = [
+  q => `That's a good place to start. Let me ask: what's the <em>actual</em> output you're seeing, and how does that differ from what you expected?`,
+  q => `Interesting. Before we go further — where's the last point in the code where things were definitely working correctly?`,
+  q => `You mentioned "${q.slice(0,30)}..." — if you had to pick the one function most likely responsible for this, which would it be?`,
+  q => `What have you already ruled out? Sometimes what we've eliminated is as revealing as what we haven't.`,
+  q => `Let's try this: can you trace what value the relevant variable holds at the exact moment the problem occurs?`,
+  q => `What does the error message or stack trace tell you about <em>where</em> it fails first?`,
+  q => `If this worked yesterday and broke today — what's the one thing that changed?`,
+  q => `Walk me through what this code is supposed to do, step by step, in plain English. Take your time.`,
+];
+
+let msgCount = 0;
+let responses = [...DUCK_RESPONSES];
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+shuffle(responses);
+
+function addMessage(role, html) {
+  const msgs = document.getElementById('demo-messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `
+    <div class="msg-role ${role}">${role === 'duck' ? '🦆 rubber-duck' : '👤 you'}</div>
+    <div class="msg-body ${role}">${html}</div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('demo-messages');
+  const div = document.createElement('div');
+  div.className = 'msg typing-msg';
+  div.innerHTML = `
+    <div class="msg-role duck">🦆 rubber-duck</div>
+    <div class="msg-body duck"><div class="typing"><span></span><span></span><span></span></div></div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function sendDemoMessage() {
+  const input = document.getElementById('demo-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMessage('user', text);
+
+  const typing = showTyping();
+  const response = responses[msgCount % responses.length];
+  msgCount++;
+
+  setTimeout(() => {
+    typing.remove();
+    addMessage('duck', response(text));
+  }, 1200 + Math.random() * 600);
+}
+
+function triggerReveal() {
+  const msgs = document.getElementById('demo-messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `
+    <div class="msg-role duck" style="color: var(--red);">🔓 rubber-duck · reveal mode</div>
+    <div class="msg-body duck" style="border-color: rgba(255,107,107,0.2);">
+      Okay — stepping out of duck mode.<br><br>
+      <strong style="color: var(--text); font-weight: 500;">What you figured out on your own:</strong> You identified the right area of the codebase and started narrowing down the cause — that's the hardest part of debugging.<br><br>
+      <strong style="color: var(--text); font-weight: 500;">The full answer:</strong> This is a demo, so there's no real bug to solve — but in a real session, I'd explain exactly what's wrong here and why the question I asked would have led you to it.<br><br>
+      <em style="color: var(--muted); font-size: 13px;">You're back in normal Claude Code mode.</em>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+document.getElementById('demo-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendDemoMessage();
+});
+
+// Streak viz
+const streakData = [1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,1];
+const bar = document.getElementById('streak-viz');
+streakData.forEach(s => {
+  const d = document.createElement('div');
+  d.className = `streak-dot ${s ? 'solved' : 'peeked'}`;
+  bar.appendChild(d);
+});
+
+// Copy install
+function copyInstall() {
+  navigator.clipboard.writeText('/plugin marketplace add https://github.com/mo-inkhan/rubber-duck').then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = 'copied!';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'copy'; btn.style.color = ''; }, 2000);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!--
+  Open this file in a browser and click "Download og.png"
+  Place the downloaded file in this same docs/ folder.
+-->
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Generate og.png</title>
+<style>
+  body { margin: 0; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; padding: 2rem; gap: 1.5rem; font-family: sans-serif; }
+  canvas { border: 1px solid #333; }
+  button {
+    background: #F5A623; color: #000; border: none;
+    padding: 10px 28px; border-radius: 6px; font-size: 15px;
+    font-weight: 600; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<button onclick="download()">Download og.png</button>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = 1200, H = 630;
+
+// Background
+ctx.fillStyle = '#0D0D0D';
+ctx.fillRect(0, 0, W, H);
+
+// Subtle radial gradient
+const grad = ctx.createRadialGradient(W/2, H*0.35, 0, W/2, H*0.35, 500);
+grad.addColorStop(0, 'rgba(245,166,35,0.08)');
+grad.addColorStop(1, 'transparent');
+ctx.fillStyle = grad;
+ctx.fillRect(0, 0, W, H);
+
+// Border
+ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+ctx.lineWidth = 1;
+ctx.strokeRect(24, 24, W-48, H-48);
+
+// Badge
+ctx.fillStyle = 'rgba(245,166,35,0.15)';
+roundRect(ctx, W/2 - 110, 80, 220, 32, 100);
+ctx.fill();
+ctx.strokeStyle = 'rgba(245,166,35,0.4)';
+ctx.lineWidth = 1;
+roundRect(ctx, W/2 - 110, 80, 220, 32, 100);
+ctx.stroke();
+ctx.fillStyle = '#F5A623';
+ctx.font = '500 12px monospace';
+ctx.textAlign = 'center';
+ctx.fillText('● CLAUDE CODE PLUGIN', W/2, 101);
+
+// Duck emoji
+ctx.font = '100px serif';
+ctx.textAlign = 'center';
+ctx.fillText('🦆', W/2, 240);
+
+// Title
+ctx.fillStyle = '#F0EDE8';
+ctx.font = '300 72px Georgia, serif';
+ctx.textAlign = 'center';
+ctx.fillText('rubber-duck', W/2, 340);
+
+// Divider line
+ctx.strokeStyle = 'rgba(245,166,35,0.4)';
+ctx.lineWidth = 1;
+ctx.beginPath();
+ctx.moveTo(W/2 - 200, 370);
+ctx.lineTo(W/2 + 200, 370);
+ctx.stroke();
+
+// Subtitle
+ctx.fillStyle = 'rgba(240,237,232,0.5)';
+ctx.font = 'italic 24px Georgia, serif';
+ctx.textAlign = 'center';
+ctx.fillText('Learn to code with AI, not just ship with it.', W/2, 420);
+
+// URL
+ctx.fillStyle = 'rgba(240,237,232,0.25)';
+ctx.font = '14px monospace';
+ctx.textAlign = 'center';
+ctx.fillText('mo-inkhan.github.io/rubber-duck', W/2, 570);
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function download() {
+  const a = document.createElement('a');
+  a.download = 'og.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@
 
 Marketing site for the [rubber-duck](https://github.com/mo-inkhan/rubber-duck) Claude Code plugin.
 
-Live at: **[mo-inkhan.github.io/rubber-duck-site](https://mo-inkhan.github.io/rubber-duck-site)**
+Live at: **[mo-inkhan.github.io/rubber-duck](https://mo-inkhan.github.io/rubber-duck)**
 
 ---
 

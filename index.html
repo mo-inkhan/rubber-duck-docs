@@ -337,10 +337,14 @@
 
   <div class="install-block">
     <span class="install-label">$</span>
-    <span class="install-cmd" id="install-text">git clone https://github.com/mo-inkhan/rubber-duck && cd rubber-duck/plugin && bash install.sh</span>
+    <span class="install-cmd" id="install-text">/plugin marketplace add https://github.com/mo-inkhan/rubber-duck</span>
     <button class="copy-btn" onclick="copyInstall()" id="copy-btn">copy</button>
   </div>
-  <p class="hero-hint">MIT license · Zero config · Marketplace &amp; npx coming soon</p>
+  <div class="install-block">
+    <span class="install-label">$</span>
+    <span class="install-cmd">/plugin install rubber-duck@duck</span>
+  </div>
+  <p class="hero-hint">MIT license · Zero config · Claude Code 1.0.33+</p>
 </div>
 
 <div class="stats-bar">
@@ -585,7 +589,7 @@ streakData.forEach(s => {
 
 // Copy install
 function copyInstall() {
-  navigator.clipboard.writeText('git clone https://github.com/mo-inkhan/rubber-duck && cd rubber-duck/plugin && bash install.sh').then(() => {
+  navigator.clipboard.writeText('/plugin marketplace add https://github.com/mo-inkhan/rubber-duck\n/plugin install rubber-duck@duck').then(() => {
     const btn = document.getElementById('copy-btn');
     btn.textContent = 'copied!';
     btn.style.color = 'var(--green)';

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Moin Khan
+  MIT License
+
+  https://github.com/mo-inkhan/rubber-duck
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Use — rubber-duck</title>
+<meta name="description" content="Terms of use for the rubber-duck Claude Code plugin.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://mo-inkhan.github.io/rubber-duck/terms">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --duck: #F5A623;
+    --bg: #0D0D0D;
+    --surface: #141414;
+    --border: rgba(255,255,255,0.08);
+    --text: #F0EDE8;
+    --muted: rgba(240,237,232,0.45);
+    --mono: 'DM Mono', monospace;
+    --serif: 'Instrument Serif', serif;
+    --sans: 'Inter', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem; height: 56px;
+    background: rgba(13,13,13,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 15px; text-decoration: none; color: var(--text); }
+  .nav-duck { font-size: 22px; }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 6rem 2rem 5rem;
+  }
+
+  .page-label {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em;
+    color: var(--duck); text-transform: uppercase; margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400; margin-bottom: 0.5rem;
+  }
+
+  .last-updated {
+    font-size: 13px; color: var(--muted); margin-bottom: 3rem;
+    font-family: var(--mono);
+  }
+
+  h2 {
+    font-size: 1rem; font-weight: 600; margin: 2.5rem 0 0.75rem;
+    color: var(--text);
+  }
+
+  p { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 1rem; }
+
+  ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+  ul li { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 0.25rem; }
+
+  a { color: var(--duck); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  footer {
+    text-align: center; padding: 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 13px;
+  }
+  footer a { color: var(--duck); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="nav-duck">🦆</span>
+    <span>rubber-duck</span>
+  </a>
+</nav>
+
+<main>
+  <div class="page-label">Legal</div>
+  <h1>Terms of Use</h1>
+  <p class="last-updated">Last updated: 2026-03-30</p>
+
+  <p>By installing or using rubber-duck, you agree to these terms.</p>
+
+  <h2>What rubber-duck is</h2>
+  <p>rubber-duck is a free, open-source Claude Code plugin licensed under the MIT license. It runs locally on your machine and has no backend or paid tier.</p>
+
+  <h2>Use at your own risk</h2>
+  <p>rubber-duck is provided as-is, without warranty of any kind. It modifies files in your <code style="font-family: var(--mono); font-size: 13px; color: var(--duck);">~/.claude/</code> directory during installation. The authors are not responsible for any issues arising from its use.</p>
+
+  <h2>What you can do</h2>
+  <ul>
+    <li>Use rubber-duck for personal or commercial projects</li>
+    <li>Modify, fork, and redistribute it under the MIT license</li>
+    <li>Contribute improvements via pull request</li>
+  </ul>
+
+  <h2>What you cannot do</h2>
+  <ul>
+    <li>Redistribute rubber-duck under a different license</li>
+    <li>Remove or obscure the copyright notice</li>
+    <li>Use the rubber-duck name or branding to misrepresent a different product</li>
+  </ul>
+
+  <h2>No affiliation with Anthropic</h2>
+  <p>rubber-duck is an independent open-source project. It is not affiliated with, endorsed by, or supported by Anthropic. Claude Code is a product of Anthropic.</p>
+
+  <h2>Changes to these terms</h2>
+  <p>Updates to these terms will be committed to the <a href="https://github.com/mo-inkhan/rubber-duck">GitHub repository</a>. Continued use of the plugin after changes constitutes acceptance.</p>
+
+  <h2>Contact</h2>
+  <p>Questions? Open an issue on <a href="https://github.com/mo-inkhan/rubber-duck">GitHub</a>.</p>
+</main>
+
+<footer>
+  <p><a href="index.html">rubber-duck</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · MIT license</p>
+</footer>
+
+</body>
+</html>
